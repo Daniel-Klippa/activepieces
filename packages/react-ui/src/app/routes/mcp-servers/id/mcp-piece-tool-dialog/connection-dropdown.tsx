@@ -91,7 +91,6 @@ export const ConnectionDropdown = React.memo(
             }
           }}
           reconnectConnection={null}
-          updateConnection={null}
           isGlobalConnection={false}
         />
 

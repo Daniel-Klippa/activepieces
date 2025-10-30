@@ -18,6 +18,9 @@ import {
     ErrorCode,
     isNil,
     Metadata,
+    OAuth2ConnectionValueWithApp,
+    PlatformOAuth2ConnectionValue,
+    CloudOAuth2ConnectionValue,
     OAuth2GrantType,
     PlatformId,
     PlatformRole,
@@ -25,6 +28,7 @@ import {
     SeekPage,
     spreadIfDefined,
     UpsertAppConnectionRequestBody,
+    UpsertOAuth2Request,
     UserId,
     WorkerJobType,
 } from '@activepieces/shared'
@@ -324,8 +328,25 @@ export const appConnectionService = (log: FastifyBaseLogger) => ({
     removeSensitiveData: (
         appConnection: AppConnection | AppConnectionSchema,
     ): AppConnectionWithoutSensitiveData => {
-        const { value: _, ...appConnectionWithoutSensitiveData } = appConnection
-        return appConnectionWithoutSensitiveData as AppConnectionWithoutSensitiveData
+        const { value, type, ...appConnectionWithoutSensitiveData } = appConnection;
+    
+        let oAuthScopes: string[] | null = null;
+
+        const oAuthTypes: AppConnectionType[] = [
+            AppConnectionType.OAUTH2,
+            AppConnectionType.CLOUD_OAUTH2,
+            AppConnectionType.PLATFORM_OAUTH2,
+        ]
+    
+        if ('scope' in value && oAuthTypes.includes(type)) {
+            oAuthScopes = value.scope.split(' ');
+        }
+    
+        return {
+            ...appConnectionWithoutSensitiveData,
+            type,
+            oAuthScopes, // Include oauthScopes in the return object
+        } as AppConnectionWithoutSensitiveData;
     },
 
     async decryptAndRefreshConnection(

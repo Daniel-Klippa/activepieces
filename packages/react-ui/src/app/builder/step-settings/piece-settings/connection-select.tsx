@@ -67,19 +67,17 @@ const validateConnectionScopes = (
   }
   console.log(
     'Validating connection scopes:',
-    connection.scopes,
+    connection.oAuthScopes,
     'against required scopes:',
     requiredScopes,
   );
-  const connectionScopes: string[] = connection.scopes || [];
+  const connectionScopes: string[] = connection.oAuthScopes || [];
   return requiredScopes.every((scope) => connectionScopes.includes(scope));
 };
 
 const ConnectionSelect = memo((params: ConnectionSelectProps) => {
   const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
   const [selectConnectionOpen, setSelectConnectionOpen] = useState(false);
-  const [updateConnection, setUpdateConnection] = 
-    useState<AppConnectionWithoutSensitiveData | null>(null);
   const [reconnectConnection, setReconnectConnection] =
     useState<AppConnectionWithoutSensitiveData | null>(null);
   const form = useFormContext<PieceAction | PieceTrigger>();
@@ -143,9 +141,9 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
             >
               <CreateOrEditConnectionDialog
                 reconnectConnection={reconnectConnection}
-                updateConnection={updateConnection}
                 isGlobalConnection={isGlobalConnection}
                 piece={params.piece}
+                extendedScopes={params.scopes}
                 key={`CreateOrEditConnectionDialog-open-${connectionDialogOpen}`}
                 open={connectionDialogOpen}
                 setOpen={(open, connection) => {
@@ -225,7 +223,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                             className=""
                             onClick={(e) => {
                               e.stopPropagation();
-                              setUpdateConnection(selectedConnection ?? null);
+                              setReconnectConnection(selectedConnection ?? null);
                               setSelectConnectionOpen(false);
                               setConnectionDialogOpen(true);
                             }}

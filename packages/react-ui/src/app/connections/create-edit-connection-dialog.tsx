@@ -54,21 +54,21 @@ import { SecretTextConnectionSettings } from './secret-text-connection-settings'
 
 type ConnectionDialogProps = {
   piece: PieceMetadataModelSummary | PieceMetadataModel;
+  extendedScopes?: string[];
   open: boolean;
   setOpen: (
     open: boolean,
     connection?: AppConnectionWithoutSensitiveData,
   ) => void;
   reconnectConnection: AppConnectionWithoutSensitiveData | null;
-  updateConnection: AppConnectionWithoutSensitiveData | null;
   isGlobalConnection: boolean;
   externalIdComingFromSdk?: string | null;
 };
 
 type CreateOrEditConnectionDialogContentProps = {
   piece: PieceMetadataModelSummary | PieceMetadataModel;
+  extendedScopes?: string[];
   reconnectConnection: AppConnectionWithoutSensitiveData | null;
-  updateConnection: AppConnectionWithoutSensitiveData | null;
   isGlobalConnection: boolean;
   externalIdComingFromSdk?: string | null;
   setOpen: (
@@ -80,8 +80,8 @@ type CreateOrEditConnectionDialogContentProps = {
 const CreateOrEditConnectionDialogContent = React.memo(
   ({
     piece,
+    extendedScopes = [],
     reconnectConnection,
-    updateConnection,
     isGlobalConnection,
     externalIdComingFromSdk,
     setOpen,
@@ -104,6 +104,7 @@ const CreateOrEditConnectionDialogContent = React.memo(
             piece,
             externalId,
             displayName,
+            extendedScopes,
           ),
           projectIds: reconnectConnection?.projectIds ?? [],
         },
@@ -132,21 +133,13 @@ const CreateOrEditConnectionDialogContent = React.memo(
       <>
         <DialogHeader className="mb-0">
           <DialogTitle className="px-5">
-            {( updateConnection && isNil(reconnectConnection) && 
-              t('Update {displayName} Connection', {
-                displayName: updateConnection.displayName,
-              })
-            )}
-            {( isNil(updateConnection) && reconnectConnection && 
-              t('Reconnect {displayName} Connection', {
-                displayName: reconnectConnection.displayName,
-              })
-            )}
-            {( isNil(updateConnection) && isNil(reconnectConnection) && 
-              t('Connect to {displayName}', {
-                displayName: piece.displayName,
-              })
-            )}
+            {reconnectConnection
+              ? t('Reconnect {displayName} Connection', {
+                  displayName: reconnectConnection.displayName,
+                })
+              : t('Connect to {displayName}', {
+                  displayName: piece.displayName,
+                })}
           </DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
@@ -235,6 +228,7 @@ const CreateOrEditConnectionDialogContent = React.memo(
                   <OAuth2ConnectionSettings
                     authProperty={piece.auth as OAuth2Property<OAuth2Props>}
                     piece={piece}
+                    extendedScopes={extendedScopes}
                     reconnectConnection={reconnectConnection}
                   />
                 </div>
@@ -277,10 +271,10 @@ CreateOrEditConnectionDialogContent.displayName =
 const CreateOrEditConnectionDialog = React.memo(
   ({
     piece,
+    extendedScopes = [],
     open,
     setOpen,
     reconnectConnection,
-    updateConnection,
     isGlobalConnection,
     externalIdComingFromSdk,
   }: ConnectionDialogProps) => {
@@ -296,9 +290,9 @@ const CreateOrEditConnectionDialog = React.memo(
         >
           <CreateOrEditConnectionDialogContent
             piece={piece}
+            extendedScopes={extendedScopes}
             setOpen={setOpen}
             reconnectConnection={reconnectConnection}
-            updateConnection={updateConnection}
             isGlobalConnection={isGlobalConnection}
             externalIdComingFromSdk={externalIdComingFromSdk}
           />

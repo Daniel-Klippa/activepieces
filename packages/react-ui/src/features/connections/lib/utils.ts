@@ -93,6 +93,7 @@ export const newConnectionUtils = {
     piece: PieceMetadataModelSummary | PieceMetadataModel,
     suggestedExternalId: string,
     suggestedDisplayName: string,
+    extendedScopes: string[] = [],
   ): Partial<UpsertAppConnectionRequestBody> {
     const projectId = authenticationSession.getProjectId();
     assertNotNullOrUndefined(projectId, 'projectId');
@@ -150,7 +151,7 @@ export const newConnectionUtils = {
           type: AppConnectionType.CLOUD_OAUTH2,
           value: {
             type: AppConnectionType.CLOUD_OAUTH2,
-            scope: piece.auth.scope.join(' '),
+            scope: (piece.auth.scope.concat(extendedScopes)).join(' '),
             authorization_method: piece.auth?.authorizationMethod,
             client_id: '',
             props: newConnectionUtils.extractDefaultPropsValues(

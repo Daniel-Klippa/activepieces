@@ -45,6 +45,7 @@ import { AutoPropertiesFormComponent } from '../builder/piece-properties/auto-pr
 
 type OAuth2ConnectionSettingsProps = {
   piece: PieceMetadataModelSummary | PieceMetadataModel;
+  extendedScopes?: string[];
   authProperty: OAuth2Property<OAuth2Props>;
   reconnectConnection: AppConnectionWithoutSensitiveData | null;
 };
@@ -111,6 +112,7 @@ type OAuth2Type =
 const OAuth2ConnectionSettingsImplementation = ({
   authProperty,
   piece,
+  extendedScopes = [],
   reconnectConnection,
   pieceToClientIdMap,
 }: OAuth2ConnectionSettingsProps & {
@@ -138,6 +140,7 @@ const OAuth2ConnectionSettingsImplementation = ({
       currentGrantType={grantType}
       isNewConnection={isNil(reconnectConnection)}
       piece={piece}
+      extendedScopes={extendedScopes}
       setOAuth2Type={setOAuth2Type}
       setGrantType={setGrantType}
       resetOAuth2Type={() =>
@@ -172,6 +175,7 @@ type OAuth2ConnectionSettingsFormParams = {
   currentGrantType: OAuth2GrantType;
   isNewConnection: boolean;
   piece: PieceMetadataModelSummary | PieceMetadataModel;
+  extendedScopes?: string[];
   setOAuth2Type: (oauth2Type: OAuth2Type) => void;
   setGrantType: (grantType: OAuth2GrantType) => void;
   resetOAuth2Type: () => void;
@@ -184,6 +188,7 @@ const OAuth2ConnectionSettingsForm = ({
   currentGrantType,
   isNewConnection,
   piece,
+  extendedScopes = [],
   setOAuth2Type,
   setGrantType,
   resetOAuth2Type,
@@ -281,7 +286,7 @@ const OAuth2ConnectionSettingsForm = ({
     clientId: string,
     props: Record<string, string> | undefined,
   ) => {
-    const scope = resolveValueFromProps(props, authProperty.scope.join(' '));
+    let scope = resolveValueFromProps(props, authProperty.scope.join(' ')) + (extendedScopes ? ` ${extendedScopes.join(' ')}` : '');
     const authUrl = resolveValueFromProps(props, authProperty.authUrl);
     const { code, codeChallenge } = await oauth2Utils.openOAuth2Popup({
       authUrl,

@@ -25,6 +25,7 @@ import {
   NoProjectSelected,
   isConnectionNameUnique,
 } from './utils';
+import { useUpdate } from 'react-use';
 
 type UseReplaceConnectionsProps = {
   setDialogOpen: (isOpen: boolean) => void;

@@ -57,7 +57,6 @@ const NewConnectionDialog = React.memo(
         {selectedPiece && (
           <CreateOrEditConnectionDialog
             reconnectConnection={null}
-            updateConnection={null}
             piece={selectedPiece}
             open={connectionDialogOpen}
             isGlobalConnection={isGlobalConnection}

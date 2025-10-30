@@ -13,6 +13,7 @@ import { ActivepiecesError,
 import { isAxiosError } from 'axios'
 import { FastifyBaseLogger } from 'fastify'
 import { pieceMetadataService } from '../../../pieces/piece-metadata-service'
+import { projectController } from '../../../project/project-controller'
 
 export const oauth2Util = (log: FastifyBaseLogger) => ({
     formatOAuth2Response: (response: Omit<BaseOAuth2ConnectionValue, 'claimed_at'>): BaseOAuth2ConnectionValue => {
@@ -81,6 +82,32 @@ export const oauth2Util = (log: FastifyBaseLogger) => ({
         switch (auth.type) {
             case PropertyType.OAUTH2:
                 return resolveValueFromProps(props, auth.tokenUrl)
+            default:
+                throw new ActivepiecesError({
+                    code: ErrorCode.INVALID_APP_CONNECTION,
+                    params: {
+                        error: 'invalid auth type',
+                    },
+                })
+        }
+    },
+    getAuthenticatedScopes: async ({
+        projectId,
+        platformId,
+        pieceName,
+        props,
+    }: OAuth2TokenUrlParams): Promise<string[]> => {
+        const pieceMetadata = await pieceMetadataService(log).getOrThrow({
+            name: pieceName,
+            projectId,
+            platformId,
+            version: undefined,
+        })
+        const auth = pieceMetadata.auth
+        assertNotNullOrUndefined(auth, 'auth')
+        switch (auth.type) {
+            case PropertyType.OAUTH2:
+                return resolveValueFromProps(props, auth.scope.join(' ')).split(' ')
             default:
                 throw new ActivepiecesError({
                     code: ErrorCode.INVALID_APP_CONNECTION,
