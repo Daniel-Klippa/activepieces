@@ -144,6 +144,7 @@ const EmbeddedConnectionDialogContent = ({
         {!isLoadingPiece && pieceModel && (
           <CreateOrEditConnectionDialogContent
             reconnectConnection={null}
+            updateConnection={null}
             piece={pieceModel}
             externalIdComingFromSdk={connectionName}
             isGlobalConnection={false}

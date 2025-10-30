@@ -47,6 +47,7 @@ type BaseTriggerParams<
   requireAuth?: boolean
   auth?: PieceAuth
   props: TriggerProps
+  extendedScopes?: string[]
   type: TS
   onEnable: (context: TriggerHookContext<PieceAuth, TriggerProps, TS>) => Promise<void>
   onDisable: (context: TriggerHookContext<PieceAuth, TriggerProps, TS>) => Promise<void>
@@ -86,6 +87,7 @@ export class ITrigger<
     public readonly description: string,
     public readonly requireAuth: boolean,
     public readonly props: TriggerProps,
+    public readonly extendedScopes: string[],
     public readonly type: TS,
     public readonly handshakeConfiguration: WebhookHandshakeConfiguration,
     public readonly onHandshake: (ctx: TriggerHookContext<PieceAuth, TriggerProps, TS>) => Promise<WebhookResponse>,
@@ -121,6 +123,7 @@ export const createTrigger = <
         params.description,
         params.requireAuth ?? true,
         params.props,
+        params.extendedScopes ?? [],
         params.type,
         params.handshakeConfiguration ?? { strategy: WebhookHandshakeStrategy.NONE },
         params.onHandshake ?? (async () => ({ status: 200 })),
@@ -141,6 +144,7 @@ export const createTrigger = <
         params.description,
         params.requireAuth ?? true,
         params.props,
+        params.extendedScopes ?? [],
         params.type,
         { strategy: WebhookHandshakeStrategy.NONE },
         async () => ({ status: 200 }),
@@ -161,6 +165,7 @@ export const createTrigger = <
         params.description,
         params.requireAuth ?? true,
         params.props,
+        params.extendedScopes ?? [],
         params.type,
         { strategy: WebhookHandshakeStrategy.NONE },
         async () => ({ status: 200 }),

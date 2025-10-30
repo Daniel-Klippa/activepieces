@@ -6,6 +6,7 @@ import { ControllerRenderProps, useFormContext } from 'react-hook-form';
 import { AutoFormFieldWrapper } from '@/app/builder/piece-properties/auto-form-field-wrapper';
 import { CreateOrEditConnectionDialog } from '@/app/connections/create-edit-connection-dialog';
 import { SearchableSelect } from '@/components/custom/searchable-select';
+import { InvalidStepIcon } from '@/components/custom/alert-icon';
 import { Button } from '@/components/ui/button';
 import { FormField, FormLabel } from '@/components/ui/form';
 import {
@@ -16,6 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { appConnectionsQueries } from '@/features/connections/lib/app-connections-hooks';
 import { authenticationSession } from '@/lib/authentication-session';
 import {
@@ -34,6 +40,7 @@ type ConnectionSelectProps = {
   disabled: boolean;
   piece: PieceMetadataModelSummary | PieceMetadataModel;
   isTrigger: boolean;
+  scopes: string[];
 };
 const addBrackets = (str: string) => `{{connections['${str}']}}`;
 const removeBrackets = (str: string | undefined) => {
@@ -45,9 +52,34 @@ const removeBrackets = (str: string | undefined) => {
     (_, connectionName) => connectionName,
   );
 };
+
+const validateConnectionScopes = (
+  connection: AppConnectionWithoutSensitiveData | null,
+  requiredScopes: string[] | undefined,
+): boolean => {
+  if (!requiredScopes || requiredScopes.length === 0) {
+    console.log('No required scopes, connection is valid');
+    return true;
+  }
+  if (connection === null) {
+    console.log('No connection selected, connection is invalid');
+    return false;
+  }
+  console.log(
+    'Validating connection scopes:',
+    connection.scopes,
+    'against required scopes:',
+    requiredScopes,
+  );
+  const connectionScopes: string[] = connection.scopes || [];
+  return requiredScopes.every((scope) => connectionScopes.includes(scope));
+};
+
 const ConnectionSelect = memo((params: ConnectionSelectProps) => {
   const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
   const [selectConnectionOpen, setSelectConnectionOpen] = useState(false);
+  const [updateConnection, setUpdateConnection] = 
+    useState<AppConnectionWithoutSensitiveData | null>(null);
   const [reconnectConnection, setReconnectConnection] =
     useState<AppConnectionWithoutSensitiveData | null>(null);
   const form = useFormContext<PieceAction | PieceTrigger>();
@@ -111,6 +143,7 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
             >
               <CreateOrEditConnectionDialog
                 reconnectConnection={reconnectConnection}
+                updateConnection={updateConnection}
                 isGlobalConnection={isGlobalConnection}
                 piece={params.piece}
                 key={`CreateOrEditConnectionDialog-open-${connectionDialogOpen}`}
@@ -131,7 +164,11 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                 disabled={params.disabled}
               >
                 <div className="relative">
-                  {field.value && !field.disabled && (
+                  {field.value && !field.disabled && 
+                    validateConnectionScopes(
+                      selectedConnection ?? null,
+                      params.scopes,
+                    ) && (
                     <>
                       {connections?.data?.find(
                         (connection) =>
@@ -155,7 +192,50 @@ const ConnectionSelect = memo((params: ConnectionSelectProps) => {
                       )}
                     </>
                   )}
-
+                  {field.value && !field.disabled && 
+                    !validateConnectionScopes(
+                      selectedConnection ?? null,
+                      params.scopes,
+                    ) && (
+                    <>
+                      {connections?.data?.find(
+                        (connection) =>
+                          connection.externalId ===
+                            removeBrackets(field.value) &&
+                          connection.scope !== AppConnectionScope.PLATFORM,
+                      ) && (
+                        <div className='absolute right-8 flex top-2'>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="">
+                                <InvalidStepIcon
+                                  size={16}
+                                  viewBox="0 0 16 15"
+                                  className="stroke-0 animate-fade"
+                                ></InvalidStepIcon>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">
+                              {t('Extra Scopes Required')}
+                            </TooltipContent>
+                          </Tooltip>
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            className=""
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setUpdateConnection(selectedConnection ?? null);
+                              setSelectConnectionOpen(false);
+                              setConnectionDialogOpen(true);
+                            }}
+                          >
+                            {t('Update Connection')}
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
                   <SelectTrigger className="flex gap-2 items-center">
                     <SelectValue
                       className="truncate flex-grow flex-shrink"

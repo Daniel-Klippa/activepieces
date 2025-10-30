@@ -60,6 +60,7 @@ type ConnectionDialogProps = {
     connection?: AppConnectionWithoutSensitiveData,
   ) => void;
   reconnectConnection: AppConnectionWithoutSensitiveData | null;
+  updateConnection: AppConnectionWithoutSensitiveData | null;
   isGlobalConnection: boolean;
   externalIdComingFromSdk?: string | null;
 };
@@ -67,6 +68,7 @@ type ConnectionDialogProps = {
 type CreateOrEditConnectionDialogContentProps = {
   piece: PieceMetadataModelSummary | PieceMetadataModel;
   reconnectConnection: AppConnectionWithoutSensitiveData | null;
+  updateConnection: AppConnectionWithoutSensitiveData | null;
   isGlobalConnection: boolean;
   externalIdComingFromSdk?: string | null;
   setOpen: (
@@ -79,6 +81,7 @@ const CreateOrEditConnectionDialogContent = React.memo(
   ({
     piece,
     reconnectConnection,
+    updateConnection,
     isGlobalConnection,
     externalIdComingFromSdk,
     setOpen,
@@ -129,13 +132,21 @@ const CreateOrEditConnectionDialogContent = React.memo(
       <>
         <DialogHeader className="mb-0">
           <DialogTitle className="px-5">
-            {reconnectConnection
-              ? t('Reconnect {displayName} Connection', {
-                  displayName: reconnectConnection.displayName,
-                })
-              : t('Connect to {displayName}', {
-                  displayName: piece.displayName,
-                })}
+            {( updateConnection && isNil(reconnectConnection) && 
+              t('Update {displayName} Connection', {
+                displayName: updateConnection.displayName,
+              })
+            )}
+            {( isNil(updateConnection) && reconnectConnection && 
+              t('Reconnect {displayName} Connection', {
+                displayName: reconnectConnection.displayName,
+              })
+            )}
+            {( isNil(updateConnection) && isNil(reconnectConnection) && 
+              t('Connect to {displayName}', {
+                displayName: piece.displayName,
+              })
+            )}
           </DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
@@ -269,6 +280,7 @@ const CreateOrEditConnectionDialog = React.memo(
     open,
     setOpen,
     reconnectConnection,
+    updateConnection,
     isGlobalConnection,
     externalIdComingFromSdk,
   }: ConnectionDialogProps) => {
@@ -286,6 +298,7 @@ const CreateOrEditConnectionDialog = React.memo(
             piece={piece}
             setOpen={setOpen}
             reconnectConnection={reconnectConnection}
+            updateConnection={updateConnection}
             isGlobalConnection={isGlobalConnection}
             externalIdComingFromSdk={externalIdComingFromSdk}
           />

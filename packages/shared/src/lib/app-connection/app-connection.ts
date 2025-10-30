@@ -123,6 +123,7 @@ export const AppConnectionWithoutSensitiveData = Type.Object({
     status: Type.Enum(AppConnectionStatus),
     ownerId: Nullable(Type.String()),
     owner: Nullable(UserWithMetaInformation),
+    scopes: Nullable(Type.Array(Type.String())), // TODO make sure to populate this field when fetching app connections
     metadata: Nullable(Metadata),
     flowIds: Nullable(Type.Array(ApId)),
 }, {

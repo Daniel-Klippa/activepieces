@@ -90,6 +90,7 @@ const PieceSettings = React.memo((props: PieceSettingsProps) => {
               isTrigger={!isNil(selectedTrigger)}
               piece={pieceModel}
               disabled={props.readonly}
+              scopes={selectedAction ? selectedAction.extendedScopes ?? [] : []}
             ></ConnectionSelect>
           )}
           {selectedAction && (

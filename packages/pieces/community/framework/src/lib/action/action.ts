@@ -28,6 +28,7 @@ type CreateActionParams<PieceAuth extends PieceAuthProperty, ActionProps extends
   displayName: string
   description: string
   props: ActionProps
+  extendedScopes?: string[]
   run: ActionRunner<PieceAuth, ActionProps>
   test?: ActionRunner<PieceAuth, ActionProps>
   requireAuth?: boolean
@@ -40,6 +41,7 @@ export class IAction<PieceAuth extends PieceAuthProperty, ActionProps extends In
     public readonly displayName: string,
     public readonly description: string,
     public readonly props: ActionProps,
+    public readonly extendedScopes: string[],
     public readonly run: ActionRunner<PieceAuth, ActionProps>,
     public readonly test: ActionRunner<PieceAuth, ActionProps>,
     public readonly requireAuth: boolean,
@@ -63,6 +65,7 @@ export const createAction = <
     params.displayName,
     params.description,
     params.props,
+    params.extendedScopes ?? [],
     params.run,
     params.test ?? params.run,
     params.requireAuth ?? true,
